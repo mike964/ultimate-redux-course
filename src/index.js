@@ -13,12 +13,13 @@ store.subscribe(() => {
 
 // store.dispatch(addBug({ description: 'a' }))
 store.dispatch(bugAdded('Bug 1'))
+store.dispatch(bugAdded({ description: 'Bug 1' }))
 
 setTimeout(() => {
 	store.dispatch(bugAdded('Bug 2'))
 }, 2000)
 setTimeout(() => {
-	store.dispatch(bugResolved(2))
+	store.dispatch(bugResolved({ id: 2 }))
 }, 2000)
 
 console.log(store.getState())

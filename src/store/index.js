@@ -1,15 +1,15 @@
-import { devToolsEnhancer } from 'redux-devtools-extension'
-import { createStore } from 'redux'
+// import { devToolsEnhancer } from 'redux-devtools-extension'
+// import { createStore } from 'redux'
 import reducer from './bugs'
+import { configureStore } from '@reduxjs/toolkit'
 
 // * Configure store
-export default function configureStore() {
-	const store = createStore(
+export default function () {
+	const store = configureStore({
 		reducer /* preloadedState, */,
-		devToolsEnhancer({
-			trace: true,
-		})
-	)
+		// devToolsEnhancer({
+		// 	trace: true,
+	})
 
 	return store
 }
