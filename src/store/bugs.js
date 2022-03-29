@@ -1,107 +1,64 @@
-import { createSlice } from '@reduxjs/toolkit';
-import moment from 'moment';
-import { createSelector } from 'reselect';
-import { apiCallBegan } from './api';
+import { createAction } from '@reduxjs/toolkit'
 
-const slice = createSlice({
-  name: 'bugs',
-  initialState: {
-    list: [],
-    loading: false,
-    lastFetch: null,
-  },
-  reducers: {
-    bugsRequested: (bugs, action) => {
-      bugs.loading = true;
-    },
-    bugsReceived: (bugs, action) => {
-      bugs.list = action.payload;
-      bugs.loading = false;
-      bugs.lastFetch = Date.now();
-    },
-    bugsRequestFailed: (bugs, action) => {
-      bugs.loading = false;
-    },
-    bugAssignedToUser: (bugs, action) => {
-      const { id: bugId, userId } = action.payload;
-      const index = bugs.list.findIndex((bug) => bug.id === bugId);
-      bugs.list[index].userId = userId;
-    },
-    bugAdded: (bugs, action) => {
-      bugs.list.push(action.payload);
-    },
-    bugResolved: (bugs, action) => {
-      const index = bugs.list.findIndex((bug) => bug.id === action.payload.id);
-      bugs.list[index].resolved = true;
-    },
-    bugRemoved: (bugs, action) => {
-      return bugs.list.filter((bug) => bug.id !== action.payload.id);
-    },
-  },
-});
-
-const {
-  bugsReceived,
-  bugAssignedToUser,
-  bugAdded,
-  bugResolved,
-  bugRemoved,
-  bugsRequested,
-  bugsRequestFailed,
-} = slice.actions;
-export default slice.reducer;
+// Action Types
+const BUG_ADDED = 'bugAdded'
+const BUG_REMOVED = 'bugRemoved'
+const BUG_RESOLVED = 'bugResolved'
 
 // Action Creators
-const url = '/bugs';
+export const bugAdded = description => ({
+	type: BUG_ADDED,
+	payload: {
+		description,
+	},
+})
 
-export const loadBugs = () => (dispatch, getState) => {
-  const { lastFetch } = getState().entities.bugs;
+export const bugRemoved = id => ({
+	type: BUG_REMOVED,
+	payload: {
+		id,
+	},
+})
 
-  const diffInMinutes = moment().diff(moment(lastFetch), 'minutes');
-  if (diffInMinutes < 10) return;
+export const bugResolved = id => ({
+	type: BUG_RESOLVED,
+	payload: {
+		id,
+	},
+})
 
-  dispatch(
-    apiCallBegan({
-      url,
-      onStart: bugsRequested.type,
-      onSuccess: bugsReceived.type,
-      onError: bugsRequestFailed.type,
-    })
-  );
-};
+// const action = createAction('bugUpdated')
+// console.log(action)
 
-export const addBug = (bug) =>
-  apiCallBegan({
-    url,
-    method: 'post',
-    data: bug,
-    onSuccess: bugAdded.type,
-  });
+// * Reducer
+let lastId = 0
 
-export const resolveBug = (id) =>
-  apiCallBegan({
-    url: `${url}/${id}`,
-    method: 'patch',
-    data: { resolved: true },
-    onSuccess: bugResolved.type,
-  });
+export default function reducer(state = [], action) {
+	switch (action.type) {
+		case BUG_ADDED:
+			return [
+				...state,
+				{
+					id: ++lastId,
+					description: action.payload.description,
+					resolved: false,
+				},
+			]
+		case BUG_REMOVED:
+			return state.filter(bug => bug.id !== action.payload.id)
 
-export const assignBugToUser = (bugId, userId) =>
-  apiCallBegan({
-    url: `${url}/${bugId}`,
-    method: 'patch',
-    data: { userId },
-    onSuccess: bugAssignedToUser.type,
-  });
+		case BUG_RESOLVED:
+			return state.map(bug =>
+				bug.id !== action.payload.id ? bug : { ...bug, resolved: true }
+			)
 
-// Selector
-export const getUnresolvedBugs = createSelector(
-  (state) => state.entities.bugs.list,
-  (list) => list.filter((bug) => !bug.resolved)
-);
+		default:
+			return state
+	}
+}
 
-export const getBugsbyUser = (userId) =>
-  createSelector(
-    (state) => state.entities.bugs.list,
-    (bugs) => bugs.filter((bug) => bug.userId === userId)
-  );
+// # RULES of DUCK PATTERN
+/*
+- Reducer should be default export of module
+- 
+*/
