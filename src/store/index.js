@@ -1,7 +1,20 @@
 // import { devToolsEnhancer } from 'redux-devtools-extension'
-// import { createStore } from 'redux'
-import reducer from './bugs'
+import { combineReducers } from 'redux'
 import { configureStore } from '@reduxjs/toolkit'
+import bugsReducer from './bugs'
+import projectReducer from './projects'
+
+// * combine all reducers
+const entities = combineReducers({
+	// slices of the store
+	bugs: bugsReducer,
+	projects: projectReducer,
+})
+
+const reducer = combineReducers({
+	entities,
+	// UI reducer
+})
 
 // * Configure store
 export default function () {

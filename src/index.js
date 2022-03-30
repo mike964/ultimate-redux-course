@@ -2,6 +2,7 @@
 
 import configureStore from './store'
 import { bugAdded, bugResolved } from './store/bugs'
+import { projectAdded } from './store/projects'
 
 console.log('Hellooo..')
 
@@ -20,6 +21,10 @@ setTimeout(() => {
 }, 2000)
 setTimeout(() => {
 	store.dispatch(bugResolved({ id: 2 }))
+}, 2000)
+
+setTimeout(() => {
+	store.dispatch(projectAdded({ name: 'Project one' }))
 }, 2000)
 
 console.log(store.getState())
