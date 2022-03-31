@@ -2,6 +2,7 @@ import {
 	// createAction, createReducer,
 	createSlice,
 } from '@reduxjs/toolkit'
+import { createSelector } from 'reselect'
 
 let lastId = 0 //  last bug id
 
@@ -25,9 +26,39 @@ const slice = createSlice({
 			const index = bugs.findIndex(bug => bug.id === action.payload.id)
 			bugs[index].resolved = true
 		},
+		// Assign bug to user id
+		bugAssignedToUser: (bugs, action) => {
+			const { bugId, userId } = action.payload
+			const index = bugs.findIndex(bug => bug.id === bugId)
+			bugs[index].userId = userId
+		},
 	},
 })
-console.log(slice)
+// console.log(slice)
 
-export const { bugAdded, bugResolved } = slice.actions
+// * SELECTOR - filter state and return some part of the store.state
+// export const getUnresolvedBugs = state =>
+// 	state.entities.bugs.filter(bug => !bug.resolved)
+
+// * Memoization - fix expensive function like filter()
+export const getUnresolvedBugs = createSelector(
+	state => state.entities.bugs,
+	state => state.entities.projects,
+	(bugs, projects) => bugs.filter(bug => !bug.resolved)
+	// if bugs or projects remain unchanged, this logic not gona recalculate again
+)
+
+export const getBugsByUser = userId =>
+	createSelector(
+		state => state.entities.bugs,
+		bugs => bugs.filter(bug => bug.userId === userId)
+	)
+
+export const { bugAdded, bugResolved, bugAssignedToUser } = slice.actions
 export default slice.reducer
+
+/*
+- Memoization is a technique for optimizing expensive funtions
+- we use reselect for memoization
+
+*/

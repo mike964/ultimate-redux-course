@@ -2,13 +2,15 @@
 import { combineReducers } from 'redux'
 import { configureStore } from '@reduxjs/toolkit'
 import bugsReducer from './bugs'
-import projectReducer from './projects'
+import projectsReducer from './projects'
+import usersReducer from './users'
 
 // * combine all reducers
 const entities = combineReducers({
 	// slices of the store
 	bugs: bugsReducer,
-	projects: projectReducer,
+	projects: projectsReducer,
+	users: usersReducer,
 })
 
 const reducer = combineReducers({
