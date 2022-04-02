@@ -3,6 +3,8 @@ import {
 	createSlice,
 } from '@reduxjs/toolkit'
 import { createSelector } from 'reselect'
+import { apiCallBegan } from './api'
+import moment from 'moment'
 
 let lastId = 0 //  last bug id
 
@@ -11,26 +13,42 @@ let lastId = 0 //  last bug id
 // We need to export slice.reducer and actions
 const slice = createSlice({
 	name: 'bugs',
-	initialState: [],
+	initialState: {
+		list: [],
+		loading: false,
+		lastFetch: null, // To perevent calling the server each time page loades
+	},
 	reducers: {
 		// actions => action handlers
+		bugsRequested: (bugs, action) => {
+			bugs.loading = true
+		},
+		// bugs/bugsReceived
+		bugsReceived: (bugs, action) => {
+			bugs.list = action.payload
+			bugs.loading = false
+			bugs.lastFetch = Date.now()
+		},
+		bugsRequestFailed: (bugs, action) => {
+			bugs.loading = false
+		},
 		bugAdded: (bugs, action) => {
 			// bugs = state
-			bugs.push({
+			bugs.list.push({
 				id: ++lastId,
 				description: action.payload.description,
 				resolved: false,
 			})
 		},
 		bugResolved: (bugs, action) => {
-			const index = bugs.findIndex(bug => bug.id === action.payload.id)
-			bugs[index].resolved = true
+			const index = bugs.list.findIndex(bug => bug.id === action.payload.id)
+			bugs.list[index].resolved = true
 		},
 		// Assign bug to user id
 		bugAssignedToUser: (bugs, action) => {
 			const { bugId, userId } = action.payload
-			const index = bugs.findIndex(bug => bug.id === bugId)
-			bugs[index].userId = userId
+			const index = bugs.list.findIndex(bug => bug.id === bugId)
+			bugs.list[index].userId = userId
 		},
 	},
 })
@@ -38,23 +56,56 @@ const slice = createSlice({
 
 // * SELECTOR - filter state and return some part of the store.state
 // export const getUnresolvedBugs = state =>
-// 	state.entities.bugs.filter(bug => !bug.resolved)
+// 	state.entities.bugs.list.filter(bug => !bug.resolved)
 
 // * Memoization - fix expensive function like filter()
 export const getUnresolvedBugs = createSelector(
 	state => state.entities.bugs,
 	state => state.entities.projects,
-	(bugs, projects) => bugs.filter(bug => !bug.resolved)
+	(bugs, projects) => bugs.list.filter(bug => !bug.resolved)
 	// if bugs or projects remain unchanged, this logic not gona recalculate again
 )
 
-export const getBugsByUser = userId =>
-	createSelector(
+export const getBugsByUser = userId => {
+	return createSelector(
 		state => state.entities.bugs,
-		bugs => bugs.filter(bug => bug.userId === userId)
+		bugs => bugs.list.filter(bug => bug.userId === userId)
 	)
+}
 
-export const { bugAdded, bugResolved, bugAssignedToUser } = slice.actions
+// * Action Creators
+const url = '/bugs'
+
+export const loadBugs = () => (dispatch, getState) => {
+	// * Cashing - To perevent calling the server each time page loades
+	const { lastFetch } = getState().entities.bugs
+
+	// Calculate difference bw 2 time points
+	const diffInMinutes = moment().diff(moment(lastFetch), 'minutes')
+	console.log('diff in minutes :' + diffInMinutes)
+	if (diffInMinutes < 10) return
+	// If difference < 10 minutes, don't call server for 2nd time
+
+	console.log(lastFetch)
+
+	dispatch(
+		apiCallBegan({
+			url,
+			onStart: bugsRequested.type,
+			onSuccess: bugsReceived.type,
+			onError: bugsRequestFailed.type,
+		})
+	)
+}
+
+export const {
+	bugAdded,
+	bugResolved,
+	bugAssignedToUser,
+	bugsReceived,
+	bugsRequested,
+	bugsRequestFailed,
+} = slice.actions
 export default slice.reducer
 
 /*

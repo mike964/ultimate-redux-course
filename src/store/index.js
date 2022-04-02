@@ -6,6 +6,7 @@ import projectsReducer from './projects'
 import usersReducer from './users'
 import logger from './middleware/logger'
 import toast from './middleware/toast'
+import api from './middleware/api'
 
 // * combine all reducers
 const entities = combineReducers({
@@ -35,7 +36,7 @@ export default function () {
 		reducer /* preloadedState, */,
 		// devToolsEnhancer({
 		// 	trace: true,
-		middleware: [...getDefaultMiddleware(), logger, toast],
+		middleware: [...getDefaultMiddleware(), logger, toast, api],
 	})
 
 	return store

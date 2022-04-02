@@ -1,15 +1,17 @@
 // import * as tvActions from './store/module';
 
 import configureStore from './store'
-import {
-	bugAdded,
-	bugResolved,
-	bugAssignedToUser,
-	getUnresolvedBugs,
-	getBugsByUser,
-} from './store/bugs'
-import { projectAdded } from './store/projects'
-import { userAdded } from './store/users'
+import { apiCallBegan } from './store/api'
+import { loadBugs } from './store/bugs'
+// import {
+// 	bugAdded,
+// 	bugResolved,
+// 	bugAssignedToUser,
+// 	getUnresolvedBugs,
+// 	getBugsByUser,
+// } from './store/bugs'
+// import { projectAdded } from './store/projects'
+// import { userAdded } from './store/users'
 
 console.log('Hellooo..')
 
@@ -45,13 +47,37 @@ store.subscribe(() => {
 
 // console.log(x === z)
 
-store.dispatch((dispatch, getState) => {
-	// Call an API when the promise is resolved => dispatch()
-	dispatch({ type: 'bugsReceived', bugs: [1, 2, 3] })
-	console.log(getState())
-})
+// store.dispatch((dispatch, getState) => {
+// 	// Call an API when the promise is resolved => dispatch()
+// 	dispatch({ type: 'bugsReceived', bugs: [1, 2, 3] })
+// 	console.log(getState())
+// })
 
-store.dispatch({
-	type: 'error',
-	payload: { message: 'An error occured.' },
-})
+// store.dispatch({
+// 	type: 'error',
+// 	payload: { message: 'An error occured.' },
+// })
+
+// store.dispatch({
+// 	type: 'apiCallBegan',
+// 	payload: {
+// 		url: '/bugs',
+// 		onSuccess: 'bugsReceived',
+// 		onError: 'apiRequestFailed',
+// 	},
+// })
+
+// * Simpler Version
+// store.dispatch(
+// 	apiCallBegan({
+// 		url: '/bugs',
+// 		onSuccess: 'bugs/bugsReceived',
+// 	})
+// )
+
+// UI Layer
+store.dispatch(loadBugs())
+
+setTimeout(() => {
+	store.dispatch(loadBugs())
+}, 3000)
