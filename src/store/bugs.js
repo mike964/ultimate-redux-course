@@ -34,11 +34,12 @@ const slice = createSlice({
 		},
 		bugAdded: (bugs, action) => {
 			// bugs = state
-			bugs.list.push({
-				id: ++lastId,
-				description: action.payload.description,
-				resolved: false,
-			})
+			// bugs.list.push({
+			// 	id: ++lastId,
+			// 	description: action.payload.description,
+			// 	resolved: false,
+			// })
+			bugs.list.push(action.payload)
 		},
 		bugResolved: (bugs, action) => {
 			const index = bugs.list.findIndex(bug => bug.id === action.payload.id)
@@ -54,9 +55,19 @@ const slice = createSlice({
 })
 // console.log(slice)
 
+// * Action Creators
+const url = '/bugs'
+
+// Save bug to the server
+export const addBug = bug =>
+	apiCallBegan({
+		url,
+		method: 'post',
+		data: bug,
+		onSuccess: bugAdded.type,
+	})
+
 // * SELECTOR - filter state and return some part of the store.state
-// export const getUnresolvedBugs = state =>
-// 	state.entities.bugs.list.filter(bug => !bug.resolved)
 
 // * Memoization - fix expensive function like filter()
 export const getUnresolvedBugs = createSelector(
@@ -72,9 +83,6 @@ export const getBugsByUser = userId => {
 		bugs => bugs.list.filter(bug => bug.userId === userId)
 	)
 }
-
-// * Action Creators
-const url = '/bugs'
 
 export const loadBugs = () => (dispatch, getState) => {
 	// * Cashing - To perevent calling the server each time page loades

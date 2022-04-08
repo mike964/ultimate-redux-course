@@ -2,7 +2,7 @@
 
 import configureStore from './store'
 import { apiCallBegan } from './store/api'
-import { loadBugs } from './store/bugs'
+import { addBug, loadBugs } from './store/bugs'
 // import {
 // 	bugAdded,
 // 	bugResolved,
@@ -76,6 +76,8 @@ store.subscribe(() => {
 // )
 
 // UI Layer
+
+store.dispatch(addBug({ description: 'new bug ' }))
 store.dispatch(loadBugs())
 
 setTimeout(() => {
