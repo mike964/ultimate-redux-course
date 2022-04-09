@@ -2,7 +2,7 @@
 
 import configureStore from './store'
 import { apiCallBegan } from './store/api'
-import { addBug, loadBugs } from './store/bugs'
+import { addBug, assignBugToUser, loadBugs, resolveBug } from './store/bugs'
 // import {
 // 	bugAdded,
 // 	bugResolved,
@@ -18,7 +18,7 @@ console.log('Hellooo..')
 const store = configureStore()
 
 store.subscribe(() => {
-	console.log('Store changed!')
+	// console.log('Store changed!')
 })
 
 // store.dispatch(userAdded({ name: 'User One' }))
@@ -77,8 +77,16 @@ store.subscribe(() => {
 
 // UI Layer
 
-store.dispatch(addBug({ description: 'new bug ' }))
+// store.dispatch(addBug({ description: 'new bug ' }))
 store.dispatch(loadBugs())
+
+// setTimeout(() => {
+// 	store.dispatch(resolveBug(1649412578256))
+// }, 2000)
+
+setTimeout(() => {
+	store.dispatch(assignBugToUser(1649412578256, 2))
+}, 1000)
 
 setTimeout(() => {
 	store.dispatch(loadBugs())

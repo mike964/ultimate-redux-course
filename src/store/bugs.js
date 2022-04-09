@@ -47,9 +47,9 @@ const slice = createSlice({
 		},
 		// Assign bug to user id
 		bugAssignedToUser: (bugs, action) => {
-			const { bugId, userId } = action.payload
+			const { id: bugId, userId } = action.payload
 			const index = bugs.list.findIndex(bug => bug.id === bugId)
-			bugs.list[index].userId = userId
+			if (bugs.list[index]) bugs.list[index].userId = userId
 		},
 	},
 })
@@ -65,6 +65,22 @@ export const addBug = bug =>
 		method: 'post',
 		data: bug,
 		onSuccess: bugAdded.type,
+	})
+
+export const resolveBug = id =>
+	apiCallBegan({
+		url: url + '/' + id,
+		method: 'patch',
+		data: { resolved: true },
+		onSuccess: bugResolved.type,
+	})
+
+export const assignBugToUser = (bugId, userId) =>
+	apiCallBegan({
+		url: url + '/' + bugId,
+		method: 'patch',
+		data: { userId },
+		onSuccess: bugAssignedToUser.type,
 	})
 
 // * SELECTOR - filter state and return some part of the store.state
@@ -106,7 +122,9 @@ export const loadBugs = () => (dispatch, getState) => {
 	)
 }
 
-export const {
+// * Reduce Coupling - prevent export actions twice
+// export const {
+const {
 	bugAdded,
 	bugResolved,
 	bugAssignedToUser,
