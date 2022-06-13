@@ -31,3 +31,7 @@ console.log(slice)
 
 export const { bugAdded, bugResolved } = slice.actions
 export default slice.reducer
+
+// * 7.6 - Select unresolved bugs
+export const getUnresolvedBugs = state =>
+	state.entities.bugs.filter(bug => !bug.resolved)

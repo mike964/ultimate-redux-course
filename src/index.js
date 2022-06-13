@@ -1,16 +1,16 @@
 // import * as tvActions from './store/module';
 
 import configureStore from './store'
-import { bugAdded, bugResolved } from './store/bugs'
+import { bugAdded, bugResolved, getUnresolvedBugs } from './store/bugs'
 import { projectAdded } from './store/projects'
 
 console.log('Hellooo..')
 
 const store = configureStore()
 
-store.subscribe(() => {
-	console.log('Store changed!')
-})
+// store.subscribe(() => {
+// 	console.log('Store changed!')
+// })
 
 // store.dispatch(addBug({ description: 'a' }))
 store.dispatch(bugAdded('Bug 1'))
@@ -28,3 +28,4 @@ setTimeout(() => {
 }, 2000)
 
 console.log(store.getState())
+console.log(getUnresolvedBugs(store.getState()))
